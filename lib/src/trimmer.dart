@@ -243,7 +243,7 @@ class Trimmer {
       outputFormatString = customVideoFormat;
     }
 
-    outputPath = '$path$videoFileName$outputFormatString';
+    outputPath = '$path$videoFileName$outputFormatString'.replaceAll(":", "_");
 
     command += '"$outputPath"';
 
