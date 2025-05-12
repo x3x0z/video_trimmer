@@ -94,9 +94,11 @@ packages:
   get_thumbnail_video:
     dependency: transitive
     description:
-      path: "../../video_thumbnail"
-      relative: true
-    source: path
+      path: "."
+      ref: main
+      resolved-ref: "77d6b5008a167b5f613e6553f5163ac6f01ab5b7"
+      url: "https://github.com/x3x0z/video_thumbnail"
+    source: git
     version: "0.7.3"
   html:
     dependency: transitive
