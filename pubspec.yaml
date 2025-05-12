@@ -11,7 +11,10 @@ dependencies:
     sdk: flutter
 
   video_player: ^2.9.2
-  ffmpeg_kit_flutter: ^6.0.3
+  get_thumbnail_video:
+    path: ../video_thumbnail
+  easy_video_editor: ^0.1.2
+
   path_provider: ^2.1.1
   intl: ^0.20.0
   path: ^1.9.1

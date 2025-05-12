@@ -1,8 +1,6 @@
 import 'dart:async';
 import 'dart:io';
-import 'package:ffmpeg_kit_flutter/ffmpeg_kit.dart';
-import 'package:ffmpeg_kit_flutter/ffmpeg_kit_config.dart';
-import 'package:ffmpeg_kit_flutter/return_code.dart';
+import 'package:easy_video_editor/easy_video_editor.dart';
 import 'package:path/path.dart';
 
 import 'package:flutter/material.dart';
@@ -222,48 +220,59 @@ class Trimmer {
       outputFormatString = outputFormat.toString();
     }
 
-    String trimLengthCommand =
-        ' -ss $startPoint -i "$videoPath" -t ${endPoint - startPoint} -avoid_negative_ts make_zero ';
+    final editor = VideoEditorBuilder(videoPath: videoPath)
+        .trim(startTimeMs: startValue.toInt(), endTimeMs: endValue.toInt());
 
-    if (ffmpegCommand == null) {
-      command = '$trimLengthCommand -c:a copy ';
-
-      if (!applyVideoEncoding) {
-        command += '-c:v copy ';
-      }
-
-      if (outputFormat == FileFormat.gif) {
-        fpsGIF ??= 10;
-        scaleGIF ??= 480;
-        command =
-            '$trimLengthCommand -vf "fps=$fpsGIF,scale=$scaleGIF:-1:flags=lanczos,split[s0][s1];[s0]palettegen[p];[s1][p]paletteuse" -loop 0 ';
-      }
-    } else {
-      command = '$trimLengthCommand $ffmpegCommand ';
-      outputFormatString = customVideoFormat;
-    }
-
-    outputPath = '$path$videoFileName$outputFormatString'.replaceAll(":", "_");
-
-    command += '"$outputPath"';
-
-    FFmpegKit.executeAsync(command, (session) async {
-      final state =
-          FFmpegKitConfig.sessionStateToString(await session.getState());
-      final returnCode = await session.getReturnCode();
-
-      debugPrint("FFmpeg process exited with state $state and rc $returnCode");
-
-      if (ReturnCode.isSuccess(returnCode)) {
-        debugPrint("FFmpeg processing completed successfully.");
-        debugPrint('Video successfully saved');
-        onSave(outputPath);
-      } else {
-        debugPrint("FFmpeg processing failed.");
-        debugPrint('Couldn\'t save the video');
-        onSave(null);
-      }
+    final finalPath = await editor.export(
+        outputPath: '$path$videoFileName$outputFormatString'.replaceAll(":", "_"), // Optional output path
+        onProgress: (progress) {
+      print('Export progress: ${(progress * 100).toStringAsFixed(1)}%');
     });
+
+    onSave(finalPath);
+
+    // String trimLengthCommand =
+    //     ' -ss $startPoint -i "$videoPath" -t ${endPoint - startPoint} -avoid_negative_ts make_zero ';
+    //
+    // if (ffmpegCommand == null) {
+    //   command = '$trimLengthCommand -c:a copy ';
+    //
+    //   if (!applyVideoEncoding) {
+    //     command += '-c:v copy ';
+    //   }
+    //
+    //   if (outputFormat == FileFormat.gif) {
+    //     fpsGIF ??= 10;
+    //     scaleGIF ??= 480;
+    //     command =
+    //         '$trimLengthCommand -vf "fps=$fpsGIF,scale=$scaleGIF:-1:flags=lanczos,split[s0][s1];[s0]palettegen[p];[s1][p]paletteuse" -loop 0 ';
+    //   }
+    // } else {
+    //   command = '$trimLengthCommand $ffmpegCommand ';
+    //   outputFormatString = customVideoFormat;
+    // }
+    //
+    // outputPath = '$path$videoFileName$outputFormatString'.replaceAll(":", "_");
+    //
+    // command += '"$outputPath"';
+    //
+    // FFmpegKit.executeAsync(command, (session) async {
+    //   final state =
+    //       FFmpegKitConfig.sessionStateToString(await session.getState());
+    //   final returnCode = await session.getReturnCode();
+    //
+    //   debugPrint("FFmpeg process exited with state $state and rc $returnCode");
+    //
+    //   if (ReturnCode.isSuccess(returnCode)) {
+    //     debugPrint("FFmpeg processing completed successfully.");
+    //     debugPrint('Video successfully saved');
+    //     onSave(outputPath);
+    //   } else {
+    //     debugPrint("FFmpeg processing failed.");
+    //     debugPrint('Couldn\'t save the video');
+    //     onSave(null);
+    //   }
+    // });
 
     // return _outputPath;
   }
